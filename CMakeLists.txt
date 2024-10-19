@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.13)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
-set(EXECUTABLE_NAME fallout2-ce)
+if(NOT DEFINED EXECUTABLE_NAME)
+    set(EXECUTABLE_NAME fallout2-ce)
+endif()
 
 if(APPLE)
     if(IOS)
@@ -20,10 +22,21 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 set(CMAKE_CXX_EXTENSIONS NO)
 
+option(HTML "Output standalone HTML (emscripten only obviously)" OFF)
+
 if(ANDROID)
     add_library(${EXECUTABLE_NAME} SHARED)
 else()
     add_executable(${EXECUTABLE_NAME} WIN32 MACOSX_BUNDLE)
+endif()
+
+if(EMSCRIPTEN AND HTML)
+    set(CMAKE_EXECUTABLE_SUFFIX ".html")
+endif()
+
+if(EMSCRIPTEN)
+    target_compile_options(${EXECUTABLE_NAME} PUBLIC "--use-port=sdl2;--use-port=zlib")
+    target_link_options(${EXECUTABLE_NAME} PUBLIC "-lidbfs.js;--use-port=sdl2;-sALLOW_MEMORY_GROWTH;--use-port=zlib;-sASYNCIFY;-sFULL_ES2;-sSINGLE_FILE;--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/pre.js;--shell-file=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/shell.htm;-sEXPORTED_RUNTIME_METHODS=callMain")
 endif()
 
 target_sources(${EXECUTABLE_NAME} PUBLIC
@@ -364,19 +377,22 @@ add_subdirectory("third_party/fpattern")
 target_link_libraries(${EXECUTABLE_NAME} ${FPATTERN_LIBRARY})
 target_include_directories(${EXECUTABLE_NAME} PRIVATE ${FPATTERN_INCLUDE_DIR})
 
-if((NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD"))
+if((NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten"))
     add_subdirectory("third_party/zlib")
     add_subdirectory("third_party/sdl2")
-else()
+elseif((NOT ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten"))
     find_package(ZLIB)
     find_package(SDL2)
 endif()
 
-target_link_libraries(${EXECUTABLE_NAME} ${ZLIB_LIBRARIES})
-target_include_directories(${EXECUTABLE_NAME} PRIVATE ${ZLIB_INCLUDE_DIRS})
+if((NOT ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten"))
+    target_link_libraries(${EXECUTABLE_NAME} ${ZLIB_LIBRARIES})
+    target_include_directories(${EXECUTABLE_NAME} PRIVATE ${ZLIB_INCLUDE_DIRS})
 
-target_link_libraries(${EXECUTABLE_NAME} ${SDL2_LIBRARIES})
-target_include_directories(${EXECUTABLE_NAME} PRIVATE ${SDL2_INCLUDE_DIRS})
+    target_link_libraries(${EXECUTABLE_NAME} ${SDL2_LIBRARIES})
+    target_include_directories(${EXECUTABLE_NAME} PRIVATE ${SDL2_INCLUDE_DIRS})
+
+endif()
 
 if(APPLE)
     if(IOS)
