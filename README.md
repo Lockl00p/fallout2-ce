@@ -9,6 +9,8 @@ For Webassembly, building from source is roughly the same as with Linux except y
 If you opt for the standalone HTML file, you're going to have to upload all of the game files into the game's filesystem. So, it's a sort of tradeoff between memory usage and ease of access.
 Also, the audio is... not the best. Oh *also* if you want to click the escape button without unfullscreening, you could fullscreen with f11.
 
+Video of it working (and instructions on how to do it). With firefox, you can't save... well, you kinda can, but it's weird. Also, yes this is a video of Fallout 1. Fallout 2 is similar but instead you use its respective game files. https://youtu.be/EB6Jsm0oMzM
+
 There is also [Fallout Community Edition](https://github.com/alexbatalov/fallout1-ce).
 
 ## Installation
