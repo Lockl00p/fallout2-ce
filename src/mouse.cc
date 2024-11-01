@@ -8,7 +8,9 @@
 #include "svga.h"
 #include "touch.h"
 #include "vcr.h"
-
+#ifdef __EMSCRIPTEN__
+#include <emscripten/html5.h>
+#endif
 namespace fallout {
 
 static void mousePrepareDefaultCursor();
@@ -111,6 +113,38 @@ static int _mouse_hotx;
 // 0x6AC7D4
 static unsigned int _mouse_idle_start_time;
 
+#ifdef __EMSCRIPTEN__
+bool em_leftDown = false;
+bool em_rightDown = false;
+int em_moveX = 0;
+bool em_locked = false;
+int em_moveY = 0;
+bool em_mmove(int ev, const EmscriptenMouseEvent *eme, void *x){
+    em_moveX = eme->movementX;
+    em_moveY = eme->movementY;
+    return true;
+}
+bool em_mclick(int ev, const EmscriptenMouseEvent *eme, void *x){
+    if(!em_locked){emscripten_request_pointerlock(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,false);em_locked = true;}
+    if(eme->button == 0){
+        em_leftDown = true;
+
+    } else if(eme->button == 2){
+        em_rightDown = true;
+    }
+    return true;
+}
+bool em_mup(int ev, const EmscriptenMouseEvent *eme, void *x){
+    if(eme->button == 0){
+        em_leftDown = false;
+
+    } else if(eme->button == 2){
+        em_rightDown = false;
+    }
+    return true;
+}
+#endif
+
 // 0x6AC7D8
 WindowDrawingProc2* _mouse_blit_trans;
 
@@ -130,6 +164,11 @@ int mouseInit()
     _mouse_disabled = 0;
 
     gCursorIsHidden = true;
+    #ifdef __EMSCRIPTEN__
+    emscripten_set_mousemove_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mmove);
+    emscripten_set_mousedown_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mclick);
+    emscripten_set_mouseup_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mup);
+    #endif
 
     mousePrepareDefaultCursor();
 
@@ -451,6 +490,19 @@ void _mouse_info()
         y = 0;
     }
 
+    #ifdef __EMSCRIPTEN__
+    x = em_moveX;
+    y = em_moveY;
+    if(em_leftDown){
+        buttons |= MOUSE_STATE_LEFT_BUTTON_DOWN;
+    }
+    if(em_rightDown){
+        buttons |= MOUSE_STATE_RIGHT_BUTTON_DOWN;
+    }
+    em_moveX = 0;
+    em_moveY = 0;
+    #endif
+    
     // Adjust for mouse senstivity.
     x = (int)(x * gMouseSensitivity);
     y = (int)(y * gMouseSensitivity);

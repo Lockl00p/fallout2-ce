@@ -4,6 +4,11 @@ Fallout 2 Community Edition is a fully working re-implementation of Fallout 2, w
 
 Popular Fallout 2 total conversion mods are partially supported. Original versions of Nevada and Sonora (that do not rely on extended features provided by Sfall) likely work, although there is no complete walkthrough confirmation yet. [Fallout 2 Restoration Project](https://github.com/BGforgeNet/Fallout2_Restoration_Project), [Fallout Et Tu](https://github.com/rotators/Fo1in2) and [Olympus 2207](https://olympus2207.com) are not yet supported. Other mods (particularly Resurrection and Yesterday) are not tested.
 
+For Webassembly, building from source is roughly the same as with Linux except you must have emsdk {Install from here}(https://emscripten.org/docs/getting_started/downloads.html), and instead of the normal cmake command, you would use `emcmake cmake {source directory}` to output a js file you can use, and `emcmake cmake {source directory} -DHTML="true"` to output a standalone html file! You may also use `emcmake cmake {source directory} -DPRELOAD="${directory to preload}" `, but this will take a lot of memory when actually running the game so beware!
+
+If you opt for the standalone HTML file, you're going to have to upload all of the game files into the game's filesystem. So, it's a sort of tradeoff between memory usage and ease of access.
+Also, the audio is... not the best. Oh *also* if you want to click the escape button without unfullscreening, you could fullscreen with f11.
+
 There is also [Fallout Community Edition](https://github.com/alexbatalov/fallout1-ce).
 
 ## Installation

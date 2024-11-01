@@ -59,6 +59,10 @@
 #include "window_manager.h"
 #include "word_wrap.h"
 #include "worldmap.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 
 namespace fallout {
 
@@ -830,7 +834,9 @@ int lsgSaveGame(int mode)
             _quick_done = true;
         }
     }
-
+    #ifdef __EMSCRIPTEN__
+    EM_ASM({FS.syncfs(false,function(){})});
+    #endif
     return rc;
 }
 

@@ -30,13 +30,22 @@ else()
     add_executable(${EXECUTABLE_NAME} WIN32 MACOSX_BUNDLE)
 endif()
 
+if(EMSCRIPTEN AND DEFINED PRELOAD)
+    if(HTML)
+    target_link_options(${EXECUTABLE_NAME} PUBLIC --embed-file ${PRELOAD}@/preload)
+    else()
+        target_link_options(${EXECUTABLE_NAME} PUBLIC --preload-file ${PRELOAD}@/preload)
+    endif()
+endif()
+
 if(EMSCRIPTEN AND HTML)
+target_link_options(${EXECUTABLE_NAME} PUBLIC "--shell-file=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/shell.htm;-sSINGLE_FILE")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif()
 
 if(EMSCRIPTEN)
     target_compile_options(${EXECUTABLE_NAME} PUBLIC "--use-port=sdl2;--use-port=zlib")
-    target_link_options(${EXECUTABLE_NAME} PUBLIC "-lidbfs.js;--use-port=sdl2;-sALLOW_MEMORY_GROWTH;--use-port=zlib;-sASYNCIFY;-sFULL_ES2;-sSINGLE_FILE;--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/pre.js;--shell-file=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/shell.htm;-sEXPORTED_RUNTIME_METHODS=callMain")
+    target_link_options(${EXECUTABLE_NAME} PUBLIC "-sASYNCIFY_STACK_SIZE=1000000;-lidbfs.js;--use-port=sdl2;-sALLOW_MEMORY_GROWTH;--use-port=zlib;-sASYNCIFY;-sFULL_ES2;--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/pre.js;-sEXPORTED_RUNTIME_METHODS=callMain")
 endif()
 
 target_sources(${EXECUTABLE_NAME} PUBLIC
