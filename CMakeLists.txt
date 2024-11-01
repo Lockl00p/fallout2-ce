@@ -45,7 +45,7 @@ endif()
 
 if(EMSCRIPTEN)
     target_compile_options(${EXECUTABLE_NAME} PUBLIC "--use-port=sdl2;--use-port=zlib")
-    target_link_options(${EXECUTABLE_NAME} PUBLIC "-sASYNCIFY_STACK_SIZE=1000000;-lidbfs.js;--use-port=sdl2;-sALLOW_MEMORY_GROWTH;--use-port=zlib;-sASYNCIFY;-sFULL_ES2;--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/pre.js;-sEXPORTED_RUNTIME_METHODS=callMain")
+    target_link_options(${EXECUTABLE_NAME} PUBLIC "-sASYNCIFY_STACK_SIZE=10000000;-lidbfs.js;--use-port=sdl2;-sALLOW_MEMORY_GROWTH;--use-port=zlib;-sASYNCIFY;-sFULL_ES2;--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/pre.js;-sEXPORTED_RUNTIME_METHODS=callMain")
 endif()
 
 target_sources(${EXECUTABLE_NAME} PUBLIC
